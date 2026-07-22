@@ -1,0 +1,143 @@
+name: Build iOS 12 Deb Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  THEOS: /opt/theos
+  SDK_VERSION: 12.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          fakeroot \
+          dpkg \
+          ldid \
+          libtool-bin \
+          libxml2-dev \
+          libssl-dev \
+          zlib1g-dev \
+          g++ \
+          make \
+          git \
+          curl \
+          wget
+
+    - name: Set up Theos
+      run: |
+        sudo mkdir -p /opt/theos
+        sudo chmod 777 /opt/theos
+
+        # Clone Theos with submodules
+        git clone --recursive https://github.com/theos/theos.git /opt/theos
+
+        # Set permissions
+        chmod -R 777 /opt/theos
+
+    - name: Download iOS 12 SDK
+      run: |
+        # Download iPhoneOS SDK
+        SDK_URL="https://github.com/theos/sdks/archive/master.tar.gz"
+        wget -q $SDK_URL -O /tmp/sdks.tar.gz
+
+        # Extract SDK
+        tar xzf /tmp/sdks.tar.gz -C /tmp/
+
+        # Copy to Theos
+        sudo mkdir -p $THEOS/sdks
+        sudo cp -r /tmp/sdks-master/iPhoneOS12.4.sdk $THEOS/sdks/
+        sudo cp -r /tmp/sdks-master/iPhoneOS11.2.sdk $THEOS/sdks/ 2>/dev/null || true
+
+        # List available SDKs
+        ls -la $THEOS/sdks/
+
+    - name: Configure environment
+      run: |
+        # Set environment variables
+        echo "THEOS=$THEOS" >> $GITHUB_ENV
+        echo "SDKVERSION=$SDK_VERSION" >> $GITHUB_ENV
+        echo "SYSROOT=$THEOS/sdks/iPhoneOS12.4.sdk" >> $GITHUB_ENV
+        echo "IPHONEOS_DEPLOYMENT_TARGET=12.0" >> $GITHUB_ENV
+
+        # Add Theos bin to PATH
+        echo "$THEOS/bin" >> $GITHUB_PATH
+
+        # Verify
+        echo "Environment configured:"
+        echo "  THEOS=$THEOS"
+        echo "  SDKVERSION=$SDK_VERSION"
+        echo "  SYSROOT=$SYSROOT"
+
+    - name: Verify Theos installation
+      run: |
+        # Check Theos
+        ls -la $THEOS/
+        echo "---"
+        ls -la $THEOS/bin/ || true
+        echo "---"
+        ls -la $THEOS/sdks/ || true
+
+    - name: Prepare build
+      run: |
+        # Ensure all source files are present
+        find . -name "*.m" -o -name "*.c" -o -name "*.h" | head -50
+
+    - name: Build package
+      run: |
+        # Clean and build
+        make clean || true
+        make package FINALPACKAGE=1 DEBUG=0
+
+    - name: Check build output
+      run: |
+        # List generated packages
+        echo "=== Generated packages ==="
+        ls -la packages/ || echo "No packages directory"
+
+        # List all deb files
+        echo "=== Deb files ==="
+        find . -name "*.deb" -exec ls -la {} \;
+
+    - name: Upload deb artifact
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: iOS12-deb-package
+        path: packages/*.deb
+        retention-days: 90
+
+    - name: Build failure diagnostics
+      if: failure()
+      run: |
+        echo "=== Build failed. Diagnostics ==="
+        echo ""
+        echo "1. Checking Theos..."
+        ls -la $THEOS/ 2>/dev/null || echo "Theos not found"
+        ls -la $THEOS/bin/ 2>/dev/null || echo "Theos/bin not found"
+        echo ""
+        echo "2. Checking SDK..."
+        ls -la $THEOS/sdks/ 2>/dev/null || echo "SDKs not found"
+        echo ""
+        echo "3. Checking environment..."
+        env | grep -E "THEOS|SDK|SYSROOT|IPHONE"
+        echo ""
+        echo "4. Checking Makefile..."
+        head -50 Makefile
+        echo ""
+        echo "5. Checking control..."
+        cat control
+        echo ""
+        echo "6. Checking source files..."
+        find Sources/ -name "*.m" -o -name "*.c" -o -name "*.h" 2>/dev/null | head -30

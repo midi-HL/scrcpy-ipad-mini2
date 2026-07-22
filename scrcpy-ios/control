@@ -1,0 +1,10 @@
+Package: com.scrcpy.ipad-mini2
+Name: scrcpy-iOS
+Depends: firmware (>= 12.0)
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Scrcpy client ported to iOS 12 - remote control Android devices from iPad mini 2.
+Maintainer: midi-HL
+Author: midi-HL
+Section: Utilities
+Priority: Optional

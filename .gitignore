@@ -1,0 +1,25 @@
+# Build artifacts
+.build/
+obj/
+packages/
+*.deb
+
+# macOS
+.DS_Store
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+
+# Theos
+.layout
+
+# Logs
+*.log
+syslog
+
+# Temporary files
+*.tmp
+*.bak
+*~
