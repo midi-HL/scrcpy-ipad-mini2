@@ -3,8 +3,6 @@ name: Build iOS 12 Deb Package
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -16,8 +14,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y fakeroot dpkg ldid
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq fakeroot dpkg
 
     - name: Set up Theos
       run: |
@@ -46,12 +44,3 @@ jobs:
         name: iOS12-deb-package
         path: scrcpy-ios/packages/*.deb
         retention-days: 90
-
-    - name: Build failure diagnostics
-      if: failure()
-      run: |
-        echo "=== Build failed ==="
-        ls -la /opt/theos/ 2>/dev/null || echo "Theos not found"
-        ls -la /opt/theos/sdks/ 2>/dev/null || echo "SDKs not found"
-        find scrcpy-ios/Sources -name "*.m" -o -name "*.c" | head -20
-        cat scrcpy-ios/control
