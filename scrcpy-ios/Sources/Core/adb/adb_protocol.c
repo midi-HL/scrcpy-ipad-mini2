@@ -199,6 +199,7 @@ int adb_shell(adb_connection_t *connection, const char *command,
 
     // Receive output
     size_t total_received = 0;
+    int result = 0;
 
     while (1) {
         if (adb_recv_msg(connection->socket, &msg) < 0) {
@@ -245,7 +246,7 @@ int adb_shell(adb_connection_t *connection, const char *command,
     adb_send_msg(connection->socket, &msg);
 
     printf("[ADB] Shell output: %zu bytes\n", total_received);
-    return (int)total_received;
+    return result ? result : (int)total_received;
 }
 
 // Push file
