@@ -17,6 +17,11 @@ jobs:
         sudo apt-get update -qq
         sudo apt-get install -y -qq fakeroot dpkg clang
 
+    - name: Set up Theos
+      run: |
+        git clone --recursive https://github.com/theos/theos.git /opt/theos
+        chmod -R 777 /opt/theos
+
     - name: Set up Theos toolchain
       run: |
         # Create Theos toolchain directory structure
@@ -25,11 +30,6 @@ jobs:
         sudo ln -sf /usr/bin/clang /opt/theos/toolchain/linux/iphone/bin/clang
         sudo ln -sf /usr/bin/clang++ /opt/theos/toolchain/linux/iphone/bin/clang++
         ls -la /opt/theos/toolchain/linux/iphone/bin/
-
-    - name: Set up Theos
-      run: |
-        git clone --recursive https://github.com/theos/theos.git /opt/theos
-        chmod -R 777 /opt/theos
 
     - name: Download iOS SDK
       run: |
