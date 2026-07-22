@@ -15,27 +15,24 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y -qq fakeroot dpkg git curl wget xz-utils
+        sudo apt-get install -y -qq fakeroot dpkg git curl wget
 
     - name: Set up Theos
       run: |
         git clone --recursive https://github.com/theos/theos.git /opt/theos
         chmod -R 777 /opt/theos
 
-    - name: Download Theos toolchain
+    - name: Set up clang toolchain
       run: |
-        # Download the official Theos toolchain for Linux
-        wget -q https://github.com/theos/toolchain/releases/latest/download/linux-x86_64.tar.xz -O /tmp/toolchain.tar.xz || true
-        if [ -f /tmp/toolchain.tar.xz ]; then
-          tar xf /tmp/toolchain.tar.xz -C /opt/theos/toolchain/
-          chmod -R 777 /opt/theos/toolchain/
-        else
-          echo "Toolchain download failed, using system clang"
-          mkdir -p /opt/theos/toolchain/linux/iphone/bin
-          ln -sf /usr/bin/clang /opt/theos/toolchain/linux/iphone/bin/clang
-          ln -sf /usr/bin/clang++ /opt/theos/toolchain/linux/iphone/bin/clang++
-        fi
-        ls -la /opt/theos/toolchain/
+        # Install clang and create symlinks
+        sudo apt-get install -y -qq clang
+        mkdir -p /opt/theos/toolchain/linux/iphone/bin
+        sudo ln -sf /usr/bin/clang /opt/theos/toolchain/linux/iphone/bin/clang
+        sudo ln -sf /usr/bin/clang++ /opt/theos/toolchain/linux/iphone/bin/clang++
+        sudo ln -sf /usr/bin/ld /opt/theos/toolchain/linux/iphone/bin/ld
+        sudo ln -sf /usr/bin/ar /opt/theos/toolchain/linux/iphone/bin/ar
+        sudo ln -sf /usr/bin/ranlib /opt/theos/toolchain/linux/iphone/bin/ranlib
+        ls -la /opt/theos/toolchain/linux/iphone/bin/
 
     - name: Download iOS SDK
       run: |
