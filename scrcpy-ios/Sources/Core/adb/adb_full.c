@@ -394,13 +394,12 @@ int adb_push(adb_handle_t *handle, const char *local_path, const char *remote_pa
     printf("[ADB] Sync channel opened\n");
 
     // Send ID_SEND
-    uint32_t id_send = ID_SEND;
     uint32_t path_len = strlen(remote_path);
     uint32_t mode = 0644;
 
     // Send stat + path
     uint8_t *send_buf = malloc(12 + path_len);
-    memcpy(send_buf, &id_send, 4);
+    memcpy(send_buf, &ID_SEND, 4);
     memcpy(send_buf + 4, &mode, 4);
     memcpy(send_buf + 8, &path_len, 4);
     memcpy(send_buf + 12, remote_path, path_len);
@@ -485,11 +484,10 @@ int adb_pull(adb_handle_t *handle, const char *remote_path, const char *local_pa
     handle->remote_id = msg.arg0;
 
     // Send ID_RECV
-    uint32_t id_recv = ID_RECV;
     uint32_t path_len = strlen(remote_path);
 
     uint8_t *recv_buf = malloc(8 + path_len);
-    memcpy(recv_buf, &id_recv, 4);
+    memcpy(recv_buf, &ID_RECV, 4);
     memcpy(recv_buf + 4, &path_len, 4);
     memcpy(recv_buf + 8, remote_path, path_len);
 
