@@ -24,10 +24,14 @@ jobs:
 
     - name: Download Theos toolchain
       run: |
-        wget -q https://github.com/theos/toolchain/releases/latest/download/linux-x86_64-Clang-16-Swift-5.10.tar.xz -O /tmp/toolchain.tar.xz
-        tar xf /tmp/toolchain.tar.xz -C /opt/theos/toolchain/
-        chmod -R 777 /opt/theos/toolchain/
-        ls -la /opt/theos/toolchain/
+        # Use Ubuntu's system clang instead of Theos toolchain
+        sudo apt-get install -y -qq clang
+        # Create toolchain directory structure that Theos expects
+        mkdir -p /opt/theos/toolchain/linux/iphone/bin
+        # Symlink system clang to where Theos expects it
+        ln -sf /usr/bin/clang /opt/theos/toolchain/linux/iphone/bin/clang
+        ln -sf /usr/bin/clang++ /opt/theos/toolchain/linux/iphone/bin/clang++
+        ls -la /opt/theos/toolchain/linux/iphone/bin/
 
     - name: Download iOS SDK
       run: |
