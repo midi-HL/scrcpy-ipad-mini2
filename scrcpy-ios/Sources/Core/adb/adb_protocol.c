@@ -199,7 +199,6 @@ int adb_shell(adb_connection_t *connection, const char *command,
 
     // Receive output
     size_t total_received = 0;
-    int result = 0;
 
     while (1) {
         if (adb_recv_msg(connection->socket, &msg) < 0) {

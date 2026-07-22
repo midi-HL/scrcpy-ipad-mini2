@@ -310,7 +310,6 @@ int adb_shell(adb_handle_t *handle, const char *command,
 
     // Receive output
     size_t total = 0;
-    uint8_t buffer[4096];
 
     while (1) {
         if (recv_header(handle->socket, &msg) < 0) break;
