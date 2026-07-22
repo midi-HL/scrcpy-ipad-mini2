@@ -15,32 +15,20 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y -qq fakeroot dpkg
+        sudo apt-get install -y -qq fakeroot dpkg clang
 
     - name: Set up Theos
       run: |
         git clone --recursive https://github.com/theos/theos.git /opt/theos
         chmod -R 777 /opt/theos
 
-    - name: Download Theos toolchain
-      run: |
-        # Use Ubuntu's system clang instead of Theos toolchain
-        sudo apt-get install -y -qq clang
-        # Create toolchain directory structure that Theos expects
-        mkdir -p /opt/theos/toolchain/linux/iphone/bin
-        # Symlink system clang to where Theos expects it
-        ln -sf /usr/bin/clang /opt/theos/toolchain/linux/iphone/bin/clang
-        ln -sf /usr/bin/clang++ /opt/theos/toolchain/linux/iphone/bin/clang++
-        ls -la /opt/theos/toolchain/linux/iphone/bin/
-
     - name: Download iOS SDK
       run: |
         wget -q https://github.com/theos/sdks/archive/master.tar.gz -O /tmp/sdks.tar.gz
         tar xzf /tmp/sdks.tar.gz -C /tmp/
         mkdir -p /opt/theos/sdks
-        cp -r /tmp/sdks-master/iPhoneOS12.4.sdk /opt/theos/sdks/
-        # Create symlink for iOS 12.0 -> 12.4
-        ln -s /opt/theos/sdks/iPhoneOS12.4.sdk /opt/theos/sdks/iPhoneOS12.0.sdk
+        # Use iPhoneOS14.4.sdk which is more stable
+        cp -r /tmp/sdks-master/iPhoneOS14.4.sdk /opt/theos/sdks/ || cp -r /tmp/sdks-master/iPhoneOS12.4.sdk /opt/theos/sdks/
         ls -la /opt/theos/sdks/
 
     - name: Build package
