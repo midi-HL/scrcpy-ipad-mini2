@@ -38,8 +38,6 @@ jobs:
         mkdir -p /opt/theos/sdks
         # Copy iPhoneOS12.4.sdk
         cp -r /tmp/sdks-master/iPhoneOS12.4.sdk /opt/theos/sdks/
-        # Create symlink for iPhoneOS14.4.sdk -> iPhoneOS12.4.sdk
-        ln -s /opt/theos/sdks/iPhoneOS12.4.sdk /opt/theos/sdks/iPhoneOS14.4.sdk
         ls -la /opt/theos/sdks/
 
     - name: Build package

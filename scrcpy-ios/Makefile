@@ -5,8 +5,8 @@
 # Architecture
 ARCHS = arm64
 
-# Target SDK - use 14.4 for better compatibility with Theos
-TARGET = iphone:clang:14.4:12.0
+# Target SDK
+TARGET = iphone:clang:12.4:12.0
 
 # Include Theos
 include $(THEOS)/makefiles/common.mk
