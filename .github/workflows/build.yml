@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  THEOS: /opt/theos
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,12 +17,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y fakeroot dpkg ldid git curl wget
+        sudo apt-get install -y fakeroot dpkg ldid
 
     - name: Set up Theos
       run: |
-        sudo mkdir -p /opt/theos
-        sudo chmod 777 /opt/theos
         git clone --recursive https://github.com/theos/theos.git /opt/theos
         chmod -R 777 /opt/theos
 
@@ -33,18 +28,13 @@ jobs:
       run: |
         wget -q https://github.com/theos/sdks/archive/master.tar.gz -O /tmp/sdks.tar.gz
         tar xzf /tmp/sdks.tar.gz -C /tmp/
-        sudo mkdir -p $THEOS/sdks
-        sudo cp -r /tmp/sdks-master/iPhoneOS12.4.sdk $THEOS/sdks/ || true
-        sudo cp -r /tmp/sdks-master/iPhoneOS11.2.sdk $THEOS/sdks/ || true
-        ls -la $THEOS/sdks/
-
-    - name: Configure environment
-      run: |
-        echo "THEOS=$THEOS" >> $GITHUB_ENV
-        echo "$THEOS/bin" >> $GITHUB_PATH
+        mkdir -p /opt/theos/sdks
+        cp -r /tmp/sdks-master/iPhoneOS12.4.sdk /opt/theos/sdks/ || true
 
     - name: Build package
       run: |
+        export THEOS=/opt/theos
+        export PATH="$THEOS/bin:$PATH"
         cd scrcpy-ios
         make clean || true
         make package FINALPACKAGE=1 DEBUG=0
@@ -61,11 +51,7 @@ jobs:
       if: failure()
       run: |
         echo "=== Build failed ==="
-        echo "Checking environment..."
-        env | grep -E "THEOS|PATH"
-        echo "Checking source files..."
+        ls -la /opt/theos/ 2>/dev/null || echo "Theos not found"
+        ls -la /opt/theos/sdks/ 2>/dev/null || echo "SDKs not found"
         find scrcpy-ios/Sources -name "*.m" -o -name "*.c" | head -20
-        echo "Checking Makefile..."
-        head -50 scrcpy-ios/Makefile
-        echo "Checking control..."
         cat scrcpy-ios/control
