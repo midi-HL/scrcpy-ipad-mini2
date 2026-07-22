@@ -28,12 +28,6 @@ static uint32_t adb_crc32(const uint8_t *data, size_t size) {
     return crc ^ 0xFFFFFFFF;
 }
 
-// Calculate message checksum
-static uint32_t adb_calculate_checksum(const adb_msg_t *msg) {
-    // Sum of all words in message header
-    return msg->command + msg->arg0 + msg->arg1 + msg->data_length + msg->data_crc32;
-}
-
 // Create ADB message
 static void adb_create_msg(adb_msg_t *msg, uint32_t command,
                            uint32_t arg0, uint32_t arg1,
@@ -62,20 +56,6 @@ static int adb_send_msg(int socket, const adb_msg_t *msg) {
 static int adb_recv_msg(int socket, adb_msg_t *msg) {
     ssize_t received = recv(socket, msg, sizeof(adb_msg_t), MSG_WAITALL);
     return (received == sizeof(adb_msg_t)) ? 0 : -1;
-}
-
-// Send data
-static int adb_send_data(int socket, const void *data, uint32_t size) {
-    const uint8_t *ptr = (const uint8_t *)data;
-    uint32_t sent = 0;
-
-    while (sent < size) {
-        ssize_t n = send(socket, ptr + sent, size - sent, 0);
-        if (n <= 0) return -1;
-        sent += n;
-    }
-
-    return 0;
 }
 
 // Receive data
