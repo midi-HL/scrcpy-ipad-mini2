@@ -27,7 +27,10 @@ jobs:
         wget -q https://github.com/theos/sdks/archive/master.tar.gz -O /tmp/sdks.tar.gz
         tar xzf /tmp/sdks.tar.gz -C /tmp/
         mkdir -p /opt/theos/sdks
-        cp -r /tmp/sdks-master/iPhoneOS12.4.sdk /opt/theos/sdks/ || true
+        cp -r /tmp/sdks-master/iPhoneOS12.4.sdk /opt/theos/sdks/
+        # Create symlink for iOS 12.0 -> 12.4
+        ln -s /opt/theos/sdks/iPhoneOS12.4.sdk /opt/theos/sdks/iPhoneOS12.0.sdk
+        ls -la /opt/theos/sdks/
 
     - name: Build package
       run: |
